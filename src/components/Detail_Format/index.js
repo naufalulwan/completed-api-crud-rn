@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { Col, Grid } from "react-native-easy-grid";
 import { Text } from "react-native-paper";
 
-const TextFormat = ({ title, content }) => {
+const DetailFormat = ({ title, content }) => {
   const [valueLine, setValueLine] = useState(1);
 
   const onTextLayout = useCallback((e) => {
@@ -47,4 +47,4 @@ const TextFormat = ({ title, content }) => {
   );
 };
 
-export default TextFormat;
+export default DetailFormat;

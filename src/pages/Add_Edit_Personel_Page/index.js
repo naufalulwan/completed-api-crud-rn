@@ -12,6 +12,8 @@ import DatePicker from "../../components/Date_Picker";
 
 import * as ImagePicker from "expo-image-picker";
 
+import Toast from "react-native-toast-message";
+
 import { useGetRanksQuery } from "../../services/RankService";
 import { useGetStatusesQuery } from "../../services/StatusService";
 import {
@@ -48,8 +50,9 @@ const AddEditPersonelPage = () => {
 
   const [image, setImage] = useState(null);
 
-  const [request, { isLoading: loadingAdd }] = useAddPersonelMutation();
-  const [editPersonel, { isLoading: loadingEdit }] =
+  const [addPersonel, { isLoading: loadingAdd, isError: addError }] =
+    useAddPersonelMutation();
+  const [editPersonel, { isLoading: loadingEdit, isError: editError }] =
     useUpdatePersonelMutation();
 
   const methods = useForm({
@@ -57,6 +60,11 @@ const AddEditPersonelPage = () => {
     defaultValues: edit
       ? {
           ...personel?.data,
+          // nrp: personel?.data.nrp,
+          // name: personel?.data.name,
+          // born_place: personel?.data.born_place,
+          // born_date: personel?.data.born_date,
+          // address: personel?.data.address,
           rank_id: ranks?.data?.filter(
             (value) => value.name === personel?.data.rank
           )[0].id,
@@ -98,8 +106,15 @@ const AddEditPersonelPage = () => {
       }
     }
 
+    const result = Object.keys(values).reduce((acc, key) => {
+      if (key !== "image") {
+        acc[key] = values[key];
+      }
+      return acc;
+    }, {});
+
     const payload = {
-      ...values,
+      ...result,
       born_date: dayjs(values.born_date).format("YYYY-MM-DD"),
     };
 
@@ -107,13 +122,37 @@ const AddEditPersonelPage = () => {
       await editPersonel({ id: tag?.id, data: payload })
         .unwrap()
         .then(() => {
+          Toast.show({
+            type: "success",
+            text1: "Yeay!",
+            text2: "Personel berhasil diubah",
+          });
           navigation.goBack();
+        })
+        .catch((_) => {
+          Toast.show({
+            type: "error",
+            text1: "Terjadi Kesalahan",
+            text2: "Personel gagal diubah",
+          });
         });
     } else {
-      await request(formdata)
+      await addPersonel(formdata)
         .unwrap()
         .then(() => {
+          Toast.show({
+            type: "success",
+            text1: "Yeay!",
+            text2: "Personel berhasil ditambahkan",
+          });
           navigation.goBack();
+        })
+        .catch((err) => {
+          Toast.show({
+            type: "error",
+            text1: "Oops!",
+            text2: "Personel gagal ditambahkan",
+          });
         });
     }
   };
@@ -175,7 +214,13 @@ const AddEditPersonelPage = () => {
             mode="outlined"
             control={control}
           />
-          <DatePicker setValue={setValue} tag="born_date" control={control} />
+          <DatePicker
+            setValue={setValue}
+            value={personel?.data.born_date}
+            tag="born_date"
+            edit={edit}
+            control={control}
+          />
           <FormInput
             name="address"
             label="Alamat"

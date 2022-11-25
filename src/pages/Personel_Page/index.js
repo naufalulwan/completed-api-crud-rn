@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { setEdit, setPersonelbyId } from "../../redux/slices/PersonelSlice";
 import { baseService } from "../../services";
 import { useGetPersonelQuery } from "../../services/PersonelService";
+import Toast from "react-native-toast-message";
 
 const PersonelPage = () => {
   const navigation = useNavigation();
@@ -133,14 +134,11 @@ const PersonelPage = () => {
           }
         }}
         ListFooterComponent={() => {
-          return (
-            isFetching &&
-            isSuccess && (
-              <View style={{ marginTop: 16, marginBottom: 32 }}>
-                <ActivityIndicator animating={true} size={"small"} />
-              </View>
-            )
-          );
+          return refresh && isFetching && isSuccess ? (
+            <View style={{ marginTop: 16, marginBottom: 32 }}>
+              <ActivityIndicator animating={true} size={"small"} />
+            </View>
+          ) : null;
         }}
       />
     </View>

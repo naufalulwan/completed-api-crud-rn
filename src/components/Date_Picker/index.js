@@ -5,8 +5,8 @@ import FormInput from "../Form_Input";
 import dayjs from "dayjs";
 import { useWatch } from "react-hook-form";
 
-const DatePicker = ({ setValue, tag, control }) => {
-  const [date, setDate] = useState(new Date());
+const DatePicker = ({ setValue, value, edit, tag, control }) => {
+  const [date, setDate] = useState(edit ? new Date(value) : new Date());
 
   const bornDateHook = useWatch({
     control,
@@ -27,7 +27,6 @@ const DatePicker = ({ setValue, tag, control }) => {
       value: date,
       mode: "date",
       display: "default",
-
       is24Hour: true,
       onChange,
     });

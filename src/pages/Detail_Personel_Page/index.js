@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Alert, View } from "react-native";
 import {
   Appbar,
@@ -13,9 +13,9 @@ import {
 } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 
-import TextFormat from "../../components/Text_Format";
+import DetailFormat from "../../components/Detail_Format";
 import { actionReducer, setEdit } from "../../redux/slices/PersonelSlice";
-
+import Toast from "react-native-toast-message";
 import {
   useDeletePersonelMutation,
   useGetPersonelByIdQuery,
@@ -28,8 +28,17 @@ const DetailPersonelPage = () => {
   const dispatch = useDispatch();
   const tag = useSelector(actionReducer);
 
-  const { data: personel, isLoading } = useGetPersonelByIdQuery(tag?.id);
+  const {
+    data: personel,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useGetPersonelByIdQuery(tag?.id);
   const [deletePersonel] = useDeletePersonelMutation();
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   useGetRanksQuery();
   useGetStatusesQuery();
@@ -57,13 +66,11 @@ const DetailPersonelPage = () => {
           justifyContent: "space-evenly",
         }}
       >
-        {isLoading ? (
-          <ActivityIndicator size={"small"} />
-        ) : personel?.data?.image ? (
+        {personel?.data?.image ? (
           <Avatar.Image
             size={100}
             onLoadStart={() => {
-              console.log("Loading Image");
+              <Avatar.Icon size={100} icon="account" />;
             }}
             source={{
               uri: "https://mabesal.indi.network" + personel?.data.image,
@@ -88,28 +95,28 @@ const DetailPersonelPage = () => {
           </Text>
 
           <Text style={{ fontSize: 16 }}>
-            NRP. {isLoading ? "0" : personel?.data?.nrp}
+            {isLoading ? "" : "NRP. " + personel?.data?.nrp}
           </Text>
         </View>
       </View>
       <View style={{ marginTop: 24 }}>
-        <TextFormat
+        <DetailFormat
           title="Pangkat"
           content={isLoading ? "..." : personel?.data?.rank}
         />
-        <TextFormat
+        <DetailFormat
           title="Status"
           content={isLoading ? "..." : personel?.data?.status}
         />
-        <TextFormat
+        <DetailFormat
           title="Alamat"
           content={isLoading ? "..." : personel?.data?.address}
         />
-        <TextFormat
+        <DetailFormat
           title="Tempat Lahir"
           content={isLoading ? "..." : personel?.data?.born_place}
         />
-        <TextFormat
+        <DetailFormat
           title="Tanggal Lahir"
           content={
             isLoading
@@ -155,7 +162,19 @@ const DetailPersonelPage = () => {
                   deletePersonel(tag?.id)
                     .unwrap()
                     .then(() => {
+                      Toast.show({
+                        type: "info",
+                        text1: "Yeay!",
+                        text2: "Personel berhasil dihapus",
+                      });
                       navigation.goBack();
+                    })
+                    .catch((err) => {
+                      Toast.show({
+                        type: "error",
+                        text1: "Oops!",
+                        text2: err?.data?.message,
+                      });
                     });
                 },
               },

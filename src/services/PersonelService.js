@@ -4,12 +4,6 @@ export const personelService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getPersonel: builder.query({
       query: (perPage) => `/pers?perPage=${perPage}`,
-      extraOptions: {
-        Headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-        },
-      },
       providesTags: ["Personel"],
     }),
     getPersonelById: builder.query({
@@ -22,6 +16,12 @@ export const personelService = baseService.injectEndpoints({
         method: "POST",
         body,
       }),
+      extraOptions: {
+        Headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
+      },
       invalidatesTags: ["Personel"],
     }),
     updatePersonel: builder.mutation({
