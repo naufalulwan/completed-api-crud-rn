@@ -9,7 +9,6 @@ import {
   Text,
   Button,
   ThemeProvider,
-  ActivityIndicator,
 } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -22,26 +21,26 @@ import {
 } from "../../services/PersonelService";
 import { useGetRanksQuery } from "../../services/RankService";
 import { useGetStatusesQuery } from "../../services/StatusService";
+import config from "../../config";
 
 const DetailPersonelPage = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const tag = useSelector(actionReducer);
 
+  useGetRanksQuery();
+  useGetStatusesQuery();
+
   const {
     data: personel,
     isLoading,
     refetch,
-    isFetching,
   } = useGetPersonelByIdQuery(tag?.id);
   const [deletePersonel] = useDeletePersonelMutation();
 
   useEffect(() => {
     refetch();
   }, []);
-
-  useGetRanksQuery();
-  useGetStatusesQuery();
 
   return (
     <View style={{ flex: 1 }}>
@@ -73,7 +72,7 @@ const DetailPersonelPage = () => {
               <Avatar.Icon size={100} icon="account" />;
             }}
             source={{
-              uri: "https://mabesal.indi.network" + personel?.data.image,
+              uri: config.BASE_URL + personel?.data.image,
             }}
           />
         ) : (

@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import { setEdit, setPersonelbyId } from "../../redux/slices/PersonelSlice";
 import { baseService } from "../../services";
 import { useGetPersonelQuery } from "../../services/PersonelService";
-import Toast from "react-native-toast-message";
+import config from "../../config";
 
 const PersonelPage = () => {
   const navigation = useNavigation();
@@ -91,7 +91,7 @@ const PersonelPage = () => {
                         {...props}
                         style={{ width: 50, height: 50, borderRadius: 50 }}
                         source={{
-                          uri: "https://mabesal.indi.network" + item.image,
+                          uri: config.BASE_URL + item.image,
                         }}
                       />
                     ) : (

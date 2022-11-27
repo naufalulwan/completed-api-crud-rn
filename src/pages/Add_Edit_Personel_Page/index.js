@@ -14,7 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import Toast from "react-native-toast-message";
 
-import { useGetRanksQuery } from "../../services/RankService";
+import { rankService, useGetRanksQuery } from "../../services/RankService";
 import { useGetStatusesQuery } from "../../services/StatusService";
 import {
   useAddPersonelMutation,
@@ -50,9 +50,8 @@ const AddEditPersonelPage = () => {
 
   const [image, setImage] = useState(null);
 
-  const [addPersonel, { isLoading: loadingAdd, isError: addError }] =
-    useAddPersonelMutation();
-  const [editPersonel, { isLoading: loadingEdit, isError: editError }] =
+  const [addPersonel, { isLoading: loadingAdd }] = useAddPersonelMutation();
+  const [editPersonel, { isLoading: loadingEdit }] =
     useUpdatePersonelMutation();
 
   const methods = useForm({
@@ -60,11 +59,6 @@ const AddEditPersonelPage = () => {
     defaultValues: edit
       ? {
           ...personel?.data,
-          // nrp: personel?.data.nrp,
-          // name: personel?.data.name,
-          // born_place: personel?.data.born_place,
-          // born_date: personel?.data.born_date,
-          // address: personel?.data.address,
           rank_id: ranks?.data?.filter(
             (value) => value.name === personel?.data.rank
           )[0].id,
@@ -83,42 +77,18 @@ const AddEditPersonelPage = () => {
   }, [register]);
 
   const onsubmit = async (values) => {
-    const formdata = new FormData();
-
-    if (!edit) {
-      formdata.append("nrp", values.nrp);
-      formdata.append("name", values.name);
-      formdata.append("born_place", values.born_place);
-      formdata.append(
-        "born_date",
-        dayjs(values.born_date).format("YYYY-MM-DD")
-      );
-      formdata.append("address", values.address);
-      formdata.append("rank_id", values.rank_id);
-      formdata.append("status_id", values.status_id);
-
-      if (image) {
-        formdata.append("image", {
-          uri: image?.uri,
-          type: `${image?.type}/${image?.uri.split(".")[1]}`,
-          name: image?.uri.split("/").pop(),
-        });
-      }
-    }
-
-    const result = Object.keys(values).reduce((acc, key) => {
-      if (key !== "image") {
-        acc[key] = values[key];
-      }
-      return acc;
-    }, {});
-
-    const payload = {
-      ...result,
-      born_date: dayjs(values.born_date).format("YYYY-MM-DD"),
-    };
-
     if (edit) {
+      const result = Object.keys(values).reduce((acc, key) => {
+        if (key !== "image") {
+          acc[key] = values[key];
+        }
+        return acc;
+      }, {});
+
+      const payload = {
+        ...result,
+        born_date: dayjs(values.born_date).format("YYYY-MM-DD"),
+      };
       await editPersonel({ id: tag?.id, data: payload })
         .unwrap()
         .then(() => {
@@ -137,6 +107,23 @@ const AddEditPersonelPage = () => {
           });
         });
     } else {
+      const formdata = new FormData();
+      const payload = {
+        ...values,
+        born_date: dayjs(values.born_date).format("YYYY-MM-DD"),
+      };
+
+      for (const key in payload) {
+        formdata.append(key, payload[key]);
+      }
+
+      if (image) {
+        formdata.append("image", {
+          uri: image?.uri,
+          type: `${image?.type}/${image?.uri.split(".")[1]}`,
+          name: image?.uri.split("/").pop(),
+        });
+      }
       await addPersonel(formdata)
         .unwrap()
         .then(() => {
